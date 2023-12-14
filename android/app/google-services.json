@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "199085661484",
+    "project_id": "yuzbir-1a340",
+    "storage_bucket": "yuzbir-1a340.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:199085661484:android:df169b4bd59a940f182089",
+        "android_client_info": {
+          "package_name": "com.yazboz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB177DgBMNa-tA1HDx8a5jFTRmyKisNFas"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
