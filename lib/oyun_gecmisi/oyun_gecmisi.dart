@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:yuzbir_yazboz/login_register_folder/auth_main_page.dart';
 import 'package:yuzbir_yazboz/oyun_gecmisi/esli_oyun%20gecmisi.dart';
 import 'package:yuzbir_yazboz/oyun_gecmisi/tekli_oyun_gecmisi.dart';
+import 'package:yuzbir_yazboz/service/auth.dart';
 
 class OyunGecmisiPage extends StatefulWidget {
   const OyunGecmisiPage({Key? key}) : super(key: key);
@@ -29,6 +32,26 @@ class _OyunGecmisiPageState extends State<OyunGecmisiPage>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> signOut(BuildContext context) async {
+    await AuthService().signOut().then(
+          (value) => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AuthMainPage(),
+            ),
+          ),
+        );
+  }
+
+  final User? user = AuthService().currentUser;
+
+  Widget _userUID() {
+    return Text(
+      user?.email ?? 'User email',
+      style: GoogleFonts.spaceGrotesk(),
+    );
   }
 
   @override
@@ -231,10 +254,7 @@ class _OyunGecmisiPageState extends State<OyunGecmisiPage>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          'Kullanıcı Adı',
-                          style: GoogleFonts.spaceGrotesk(),
-                        ),
+                        _userUID(),
                       ],
                     ),
                   ),
@@ -247,7 +267,9 @@ class _OyunGecmisiPageState extends State<OyunGecmisiPage>
                   child: Divider(),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await signOut(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1F3A5F),
                     fixedSize: const Size(140, 30),
