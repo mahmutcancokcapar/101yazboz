@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:yuzbir_yazboz/kesfet_folder/ilan_card.dart';
 import 'package:yuzbir_yazboz/kesfet_folder/yeni_ilan.dart';
 
 class KesfetPage extends StatefulWidget {
@@ -106,6 +108,8 @@ class _KesfetPageState extends State<KesfetPage> {
     selectedSehir = sehirler[0];
     selectedKisi = kacKisi[0];
   }
+
+  String? userUID;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
@@ -286,18 +290,54 @@ class _KesfetPageState extends State<KesfetPage> {
                     ),
                     child: Divider(),
                   ),
-                  SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      children: [
-                        Center(
-                          child: Text(
-                            'Kriterlerinize uygun seçenek bulunamadı',
-                            style: GoogleFonts.spaceGrotesk(),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
+                  Expanded(
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('ilanlar')
+                          .where(
+                            'sehir',
+                            isEqualTo: selectedSehir.toString(),
+                          )
+                          .where(
+                            'kisiSayisi',
+                            isEqualTo: selectedKisi.toString(),
+                          )
+                          .snapshots(),
+                      builder:
+                          (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasData) {
+                          final ilanList = snapshot.data!.docs;
+                          return GridView.count(
+                            crossAxisCount: 1,
+                            childAspectRatio: 1.6,
+                            children: ilanList
+                                .map<Widget>(
+                                  (ilan) => IlanCard(
+                                    doc: ilan,
+                                    userUID: userUID ?? '',
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        } else {
+                          return Column(
+                            children: [
+                              Center(
+                                child: Text(
+                                  'Kriterlerinize uygun seçenek bulunamadı',
+                                  style: GoogleFonts.spaceGrotesk(),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
                     ),
                   ),
                 ],
