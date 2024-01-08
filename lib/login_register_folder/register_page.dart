@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:yuzbir_yazboz/login_register_folder/email_verification_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,8 +11,68 @@ class RegisterPage extends StatefulWidget {
 }
 
 bool isObsecure = true;
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class _RegisterPageState extends State<RegisterPage> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController rpasswordController = TextEditingController();
+
+  String errorMessage = '';
+  Future<void> registerUser(BuildContext context) async {
+    try {
+      if (passwordController.text == rpasswordController.text) {
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+        await userCredential.user!.sendEmailVerification();
+        // ignore: use_build_context_synchronously
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EmailVerificationPage(),
+          ),
+        );
+      } else {
+        errorMessage = 'Şifre tekrarını yanlış girdiniz, lütfen kontrol edin';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(
+              'Hata',
+              style: GoogleFonts.spaceGrotesk(),
+            ),
+            content: Text(
+              'Kayıt Başarısız',
+              style: GoogleFonts.spaceGrotesk(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Kayıt oluşturulurken bir şeyler ters gitti, lütfen tekrar deneyiniz',
+                  style: GoogleFonts.spaceGrotesk(),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 right: 10,
               ),
               child: TextField(
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -91,6 +154,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 right: 10,
               ),
               child: TextField(
+                controller: passwordController,
                 obscureText: isObsecure,
                 decoration: InputDecoration(
                   suffixIcon: IconButton(
@@ -139,6 +203,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 right: 10,
               ),
               child: TextField(
+                controller: rpasswordController,
                 obscureText: isObsecure,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -151,7 +216,9 @@ class _RegisterPageState extends State<RegisterPage> {
               height: 20,
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                registerUser(context);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1F3A5F),
                 fixedSize: const Size(150, 50),
