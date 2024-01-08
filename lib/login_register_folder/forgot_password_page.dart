@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -9,6 +10,71 @@ class ForgotPasswordPage extends StatefulWidget {
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final emailController = TextEditingController();
+  bool isButtonEnabled = false;
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  void checkField() {
+    setState(() {
+      isButtonEnabled = emailController.text.isNotEmpty;
+    });
+  }
+
+  Future resetPassword() async {
+    try {
+      FirebaseAuth.instance.sendPasswordResetEmail(
+        email: emailController.text.trim(),
+      );
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(
+                'Şifrenizi yenilemeniz için girmiş olduğunuz E-Posta adresine link gönderilmiştir, lütfen kontrol ediniz.',
+                style: GoogleFonts.spaceGrotesk(),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Tamam',
+                    style: GoogleFonts.spaceGrotesk(),
+                  ),
+                ),
+              ],
+            );
+          });
+    } on FirebaseAuthException catch (e) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(
+                e.message.toString(),
+                style: GoogleFonts.spaceGrotesk(),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Tamam',
+                    style: GoogleFonts.spaceGrotesk(),
+                  ),
+                ),
+              ],
+            );
+          });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -100,6 +166,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         right: 20,
                       ),
                       child: TextField(
+                        controller: emailController,
+                        onChanged: (value) => checkField(),
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -115,7 +183,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       height: 40,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: isButtonEnabled ? resetPassword : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1F3A5F),
                         fixedSize: const Size(200, 60),
