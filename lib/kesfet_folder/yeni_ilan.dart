@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:yuzbir_yazboz/service/auth.dart';
+import 'package:yuzbir_yazboz/service/ilanlar.dart';
 
 class YeniIlan extends StatefulWidget {
   const YeniIlan({super.key});
@@ -100,6 +105,9 @@ class _YeniIlanState extends State<YeniIlan> {
   String? selectedSehir;
   String? selectedKisi;
   TextEditingController aciklamaController = TextEditingController();
+  String tarih = DateFormat('dd/MM/yyyy - hh:mm aaa').format(DateTime.now());
+  FirebaseAuth auth = FirebaseAuth.instance;
+  final User? user = AuthService().currentUser;
   @override
   void initState() {
     super.initState();
@@ -115,8 +123,57 @@ class _YeniIlanState extends State<YeniIlan> {
     });
   }
 
+  Future<void> addData({
+    required String collection,
+    required String aciklama,
+    required String sehir,
+    required String kisiSayisi,
+    required String tarih,
+    required String userEmail,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      String userEmail = user.email ?? 'User email';
+      final docPlace = FirebaseFirestore.instance.collection(collection).doc();
+      final ilanlar = Ilanlar(
+        id: docPlace.id,
+        aciklama: aciklamaController.text,
+        sehir: selectedSehir.toString(),
+        kisiSayisi: selectedKisi.toString(),
+        tarih: tarih,
+        userEmail: userEmail,
+      );
+      final json = ilanlar.toJson();
+      await docPlace.set(json);
+    }
+  }
+
+  final snackBar = SnackBar(
+    content: Text(
+      'İlan başarıyla paylaşıldı',
+      style: GoogleFonts.spaceGrotesk(),
+    ),
+    action: SnackBarAction(
+      label: 'Tamam',
+      onPressed: () {},
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
+    String userEmail = user?.email ?? 'User email';
+    void onButtonPressed() {
+      addData(
+        collection: 'ilanlar',
+        aciklama: aciklamaController.text,
+        sehir: selectedSehir.toString(),
+        kisiSayisi: selectedKisi.toString(),
+        tarih: tarih,
+        userEmail: userEmail,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -396,7 +453,9 @@ class _YeniIlanState extends State<YeniIlan> {
                 height: 30,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  onButtonPressed();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1F3A5F),
                   fixedSize: const Size(150, 50),
