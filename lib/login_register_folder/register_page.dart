@@ -18,6 +18,11 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController rpasswordController = TextEditingController();
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   String errorMessage = '';
   Future<void> registerUser(BuildContext context) async {
     try {
@@ -27,14 +32,14 @@ class _RegisterPageState extends State<RegisterPage> {
           email: emailController.text.trim(),
           password: passwordController.text.trim(),
         );
-        await userCredential.user!.sendEmailVerification();
-        // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const EmailVerificationPage(),
-          ),
-        );
+        await userCredential.user!.sendEmailVerification().then(
+              (value) => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EmailVerificationPage(),
+                ),
+              ),
+            );
       } else {
         errorMessage = 'Şifre tekrarını yanlış girdiniz, lütfen kontrol edin';
         ScaffoldMessenger.of(context).showSnackBar(
@@ -45,31 +50,8 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(
-              'Hata',
-              style: GoogleFonts.spaceGrotesk(),
-            ),
-            content: Text(
-              'Kayıt Başarısız',
-              style: GoogleFonts.spaceGrotesk(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Kayıt oluşturulurken bir şeyler ters gitti, lütfen tekrar deneyiniz',
-                  style: GoogleFonts.spaceGrotesk(),
-                ),
-              ),
-            ],
-          );
-        },
-      );
+      // ignore: avoid_print
+      print(e);
     }
   }
 
