@@ -29,27 +29,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       FirebaseAuth.instance.sendPasswordResetEmail(
         email: emailController.text.trim(),
       );
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text(
-                'Şifrenizi yenilemeniz için girmiş olduğunuz E-Posta adresine link gönderilmiştir, lütfen kontrol ediniz.',
-                style: GoogleFonts.spaceGrotesk(),
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    'Tamam',
-                    style: GoogleFonts.spaceGrotesk(),
-                  ),
-                ),
-              ],
-            );
-          });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Şifre yenileme linki E-Posta adresinize gönderilmiştir.',
+            style: GoogleFonts.spaceGrotesk(),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       showDialog(
           context: context,
